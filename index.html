@@ -254,10 +254,14 @@ function startQuiz(n){
   quiz={items:shuffle(Q).slice(0,n).map(x=>({...x,opts:shuffle(x.a.map((t,i)=>({t,ok:i===0})))})),i:0,right:0,picked:null,saved:false};
   renderQuiz();$("practice").scrollIntoView({behavior:"smooth",block:"start"});
 }
+const SCORE_CHANNEL="https://ntfy.sh/philip-permit-tss2ro717u";
+function sendScore(r,n,pct,pass){
+  try{fetch(SCORE_CHANNEL,{method:"POST",body:`Philip: ${r}/${n} (${pct}%) ${pass?"✅ would pass":"❌ not yet"}`,headers:{"Title":"Practice test","Tags":pass?"white_check_mark":"books"}}).catch(()=>{})}catch(e){}
+}
 function renderQuiz(){
   const box=$("quiz");
   if(!quiz){
-    box.innerHTML=`<p class="hint" style="margin:0 0 12px">The real test has 50 questions. Philip needs 40 right (80%) to pass.</p>
+    box.innerHTML=`<p class="hint" style="margin:0 0 12px">The real test has 50 questions. Philip needs 40 right (80%) to pass. Ebbe gets each score.</p>
       <div class="row"><button class="btn" data-q="start" data-n="10">Quick 10</button><button class="btn ghost" data-q="start" data-n="${Q.length}">All ${Q.length} questions</button></div>
       ${scores.length?`<p class="hint" style="margin:14px 0 0">Recent scores</p><div class="scores">${scores.slice(0,10).map(s=>`<span class="sc ${s.score/s.total<0.8?"fail":""}">${s.score}/${s.total}</span>`).join("")}</div>`:""}`;
     return;
@@ -265,7 +269,7 @@ function renderQuiz(){
   const n=quiz.items.length;
   if(quiz.i>=n){
     const pct=Math.round(quiz.right/n*100),pass=pct>=80;
-    if(!quiz.saved){quiz.saved=true;scores.unshift({score:quiz.right,total:n,at:Date.now()});scores=scores.slice(0,30);store.set("pp-scores",scores);showBest()}
+    if(!quiz.saved){quiz.saved=true;scores.unshift({score:quiz.right,total:n,at:Date.now()});scores=scores.slice(0,30);store.set("pp-scores",scores);showBest();sendScore(quiz.right,n,pct,pass)}
     box.innerHTML=`<div class="big">${quiz.right}/${n}</div><span class="verdict ${pass?"":"fail"}">${pct}% · ${pass?"Would pass":"Not yet. Need 80%"}</span>
       <div class="row"><button class="btn" data-q="start" data-n="${n}">Try again</button><button class="btn ghost" data-q="home">Done</button></div>`;
     return;
