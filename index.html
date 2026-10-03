@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Philip's Permit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap">
+<style>
+:root{
+  --bg:#ECEFED; --surface:#FFFFFF; --sunk:#F4F6F5; --ink:#18201C; --muted:#5A6660; --line:#D3DAD6;
+  --sign:#0A6640; --sign-ink:#FFFFFF; --caution:#F2B705; --caution-ink:#3A2C00; --stop:#B42318; --ok:#1F7A4C;
+  --font:"Overpass","Helvetica Neue",Arial,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111513; --surface:#1A1F1C; --sunk:#151917; --ink:#E5EBE8; --muted:#9AA6A0; --line:#2C3531;
+  --sign:#0D7349; --caution:#E3AB0B; --caution-ink:#2A2000; --stop:#F06A5F; --ok:#4CC38A; color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5;
+  padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(48px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:640px;margin:0 auto;display:grid;gap:18px}
+h1,h2{margin:0;text-wrap:balance}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--caution);outline-offset:2px}
+a{color:inherit}
+
+.sign{background:var(--sign);color:var(--sign-ink);border-radius:14px;padding:6px}
+.sign-in{border:3px solid var(--sign-ink);border-radius:10px;padding:16px 20px;display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;justify-content:space-between}
+.sign h1{font-size:clamp(26px,6vw,36px);font-weight:900;line-height:1}
+.sign .sub{font-size:14px;opacity:.88;margin-top:4px}
+.nums{display:flex;gap:24px}
+.num b{display:block;font-weight:900;font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
+.num span{font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.85}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h2{font-size:21px;font-weight:800;margin-bottom:12px}
+.hint{color:var(--muted);font-size:15px}
+.btn{border:0;background:var(--ink);color:var(--surface);border-radius:8px;padding:10px 18px;cursor:pointer;font-weight:700}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* Practice test (yellow) */
+#practice{background:var(--caution);color:var(--caution-ink);border-color:var(--caution)}
+#practice .hint,#practice .qz-top{color:var(--caution-ink);opacity:.85}
+#practice .btn{background:var(--caution-ink);color:var(--caution)}
+#practice .btn.ghost{background:transparent;color:var(--caution-ink);border:1.5px solid var(--caution-ink)}
+.qz-top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:14px;margin-bottom:10px}
+.qz-q{font-size:19px;font-weight:700;margin:0 0 12px}
+.qz-sign{display:flex;justify-content:center;margin:4px 0 14px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:2px solid transparent;background:var(--surface);color:var(--ink);border-radius:10px;padding:12px 14px;cursor:pointer}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);font-weight:700}
+.opt.wrong{border-color:var(--stop);color:var(--stop);text-decoration:line-through}
+.why{margin-top:12px;padding:10px 14px;border-radius:10px;background:var(--surface);color:var(--ink);border-left:4px solid var(--ok)}
+.why.bad{border-left-color:var(--stop)}
+.big{font-size:44px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.verdict{display:inline-block;margin:8px 0 12px;padding:4px 12px;border-radius:999px;font-weight:800;background:var(--ok);color:#fff}
+.verdict.fail{background:var(--stop)}
+.scores{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.sc{font-size:13px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--surface);color:var(--ok);border:1.5px solid var(--ok);font-variant-numeric:tabular-nums}
+.sc.fail{color:var(--stop);border-color:var(--stop)}
+
+/* Plan */
+.steps{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;counter-increment:s}
+.steps li::before{content:counter(s);width:30px;height:30px;border-radius:50%;background:var(--sign);color:var(--sign-ink);display:grid;place-items:center;font-weight:900}
+.steps b{display:block}
+.steps span{color:var(--muted);font-size:15px}
+
+/* Checklist */
+.task{display:flex;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.check{appearance:none;-webkit-appearance:none;flex:none;width:26px;height:26px;border:2px solid var(--muted);border-radius:6px;margin:0;cursor:pointer;display:grid;place-items:center;background:var(--surface)}
+.check:checked{background:var(--sign);border-color:var(--sign)}
+.check:checked::after{content:"";width:7px;height:13px;border:solid var(--sign-ink);border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.t{flex:1;min-width:0}
+.done .t{text-decoration:line-through;color:var(--muted)}
+.who{flex:none;font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--sunk);border:1.5px solid var(--line)}
+.who.p{background:var(--sign);color:var(--sign-ink);border-color:var(--sign)}
+.grp-h{font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 2px}
+.grp-h:first-child{margin-top:0}
+
+.links{display:grid;gap:6px;font-size:15px}
+.foot{font-size:14px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="sign"><div class="sign-in">
+    <div><h1>PHILIP'S PERMIT</h1><div class="sub">Florida learner's permit · Christmas 2026</div></div>
+    <div class="nums">
+      <div class="num"><b id="days">–</b><span>days to go</span></div>
+      <div class="num"><b id="best">–</b><span>best score</span></div>
+    </div>
+  </div></header>
+
+  <section class="card" id="practice">
+    <h2>1. Practice test</h2>
+    <div id="quiz"></div>
+  </section>
+
+  <section class="card">
+    <h2>2. The plan</h2>
+    <ol class="steps">
+      <li><div><b>Pass the practice test</b><span>Aim for 40 out of 50 or better, a few times in a row.</span></div></li>
+      <li><div><b>Nov 21: Ebbe books the DMV</b><span>For Dec 21–23 at a Hillsborough tax collector office.</span></div></li>
+      <li><div><b>Pack the papers</b><span>See the checklist below.</span></div></li>
+      <li><div><b>DMV day</b><span>Sign 2 forms, eye and hearing check, written test (if not done at school), pay.</span></div></li>
+      <li><div><b>Permit! 🎉</b><span>Then drive with an adult 21+ for 50 hours (10 at night). Full license after 12 months.</span></div></li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>3. Checklist</h2>
+    <div id="list"></div>
+    <p class="hint" style="margin:10px 0 0">Ticks are saved on this phone only.</p>
+  </section>
+
+  <section class="card">
+    <h2>Links</h2>
+    <div class="links">
+      <a href="https://www.flhsmv.gov/resource-center/driver-license-handbooks/" target="_blank" rel="noopener">Florida driver handbook</a>
+      <a href="https://www.hillstaxfl.gov/" target="_blank" rel="noopener">Book DMV appointment (Hillsborough tax collector)</a>
+      <a href="https://www.flhsmv.gov/pdf/forms/71120.pdf" target="_blank" rel="noopener">Address form HSMV-71120</a>
+      <a href="https://www.flhsmv.gov/pdf/forms/71142.pdf" target="_blank" rel="noopener">Parent consent form HSMV-71142</a>
+      <span>Florida DMV: (850) 617-2000</span>
+    </div>
+  </section>
+
+  <p class="foot">Practice questions are based on the Florida driver handbook. The real test may word things differently.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const Q=[
+ // Signs
+ {s:"stop",q:"What does a sign with this shape mean?",a:["Stop completely","Yield","Slow down","Railroad ahead"],why:"Eight sides (octagon) is only used for STOP signs."},
+ {s:"yield",q:"What does this sign shape mean?",a:["Yield: slow down and give way","Stop completely","No entry","Merge left"],why:"A triangle pointing down is a YIELD sign."},
+ {s:"school",q:"A five-sided (pentagon) sign means:",a:["School zone or school crossing","Railroad crossing","No passing zone","Hospital ahead"],why:"Pentagon signs mark school zones and school crossings."},
+ {s:"rr",q:"A round yellow sign warns you about:",a:["A railroad crossing ahead","A school zone","A roundabout","A stop sign ahead"],why:"The round yellow sign is the advance warning for a railroad crossing."},
+ {s:"warn",q:"A yellow diamond-shaped sign is a:",a:["Warning of a hazard or road change ahead","Speed limit sign","Guide to a nearby town","Parking rule"],why:"Diamond signs warn of hazards like curves, merges or crossings."},
+ {s:"nopass",q:"This sideways pennant-shaped sign means:",a:["No passing zone","Wind warning","Detour","One way"],why:"The pennant sits on the left side of the road and marks the start of a no passing zone."},
+ {s:"work",q:"An orange diamond sign means:",a:["Road work or construction ahead","Hospital zone","Scenic area","Truck route"],why:"Orange signs are used for work zones."},
+ {s:"service",q:"A blue rectangle sign shows:",a:["Motorist services like gas, food, hospital","Speed limits","Directions to cities","Parks and recreation"],why:"Blue signs point to services."},
+ {s:"guide",q:"A green rectangle sign gives:",a:["Directions and distances","Warnings","School information","Parking rules"],why:"Green signs are guide signs: directions, exits and distances."},
+ {s:"rec",q:"A brown sign points to:",a:["Parks and recreation areas","Hospitals","Construction","Rest stops only"],why:"Brown signs mark recreation and cultural sites."},
+ // Lights and markings
+ {q:"A flashing red traffic light means:",a:["Stop completely, then go when it's safe","Slow down and continue","The light is broken, ignore it","Stop only if cars are coming"],why:"Treat a flashing red like a stop sign."},
+ {q:"A flashing yellow traffic light means:",a:["Slow down and go ahead with caution","Stop completely","Speed up to clear the intersection","Turn right only"],why:"Flashing yellow means proceed carefully."},
+ {q:"A steady yellow light means:",a:["The light is about to turn red; stop if you safely can","Speed up to beat the red","Pedestrians only","Turn left only"],why:"Yellow warns that red is coming."},
+ {q:"In Florida, may you turn right on a red light?",a:["Yes, after a full stop, unless a sign says no","Never","Only if no one is behind you","Only on a green arrow"],why:"Right on red is allowed after a complete stop unless a sign forbids it."},
+ {q:"A solid yellow line on your side of the center line means:",a:["Do not pass","Passing is allowed","Lane for buses only","Road ends"],why:"You may not cross a solid line on your side to pass."},
+ {q:"The center lane with yellow lines on both sides and arrows is for:",a:["Left turns only","Passing","Emergency vehicles only","Parking"],why:"A shared center turn lane is only for turning left."},
+ {q:"At a 4-way stop, two cars arrive at the same time. Who goes first?",a:["The car on the right","The car on the left","The bigger vehicle","Whoever honks first"],why:"Yield to the driver on your right."},
+ // Speeds and distances
+ {q:"Unless signs say otherwise, the speed limit in a business or residential area is:",a:["30 mph","25 mph","35 mph","40 mph"],why:"Florida's default in business and residence districts is 30 mph."},
+ {q:"On a 4-lane interstate with a 70 mph limit, the minimum speed is:",a:["50 mph","40 mph","45 mph","There is no minimum"],why:"Where the limit is 70, the minimum is 50 mph (otherwise 40 mph)."},
+ {q:"You must signal a turn at least how far before turning?",a:["100 feet","50 feet","25 feet","200 feet"],why:"Florida requires a signal at least 100 feet before a turn."},
+ {q:"When passing a bicycle, leave at least:",a:["3 feet","1 foot","2 feet","10 feet"],why:"Florida law requires at least 3 feet."},
+ {q:"At a railroad crossing where you must stop, stop between:",a:["15 and 50 feet from the nearest rail","5 and 10 feet","50 and 100 feet","Right on the tracks"],why:"Stop no closer than 15 feet and no farther than 50 feet."},
+ // Parking
+ {q:"You may not park within how many feet of a fire hydrant?",a:["15 feet","5 feet","10 feet","30 feet"],why:"Stay at least 15 feet from a fire hydrant."},
+ {q:"You may not park within how many feet of a crosswalk at an intersection?",a:["20 feet","10 feet","5 feet","50 feet"],why:"Stay 20 feet back from a crosswalk at an intersection."},
+ {q:"You may not park within how many feet of a stop sign or traffic signal?",a:["30 feet","15 feet","20 feet","50 feet"],why:"Stay 30 feet back from stop signs, flashing signals and traffic signals."},
+ {q:"Parking uphill next to a curb, turn your front wheels:",a:["Away from the curb","Toward the curb","Straight ahead","It doesn't matter"],why:"Away from the curb, so the car rolls into the curb if the brake fails."},
+ {q:"Parking downhill next to a curb, turn your front wheels:",a:["Toward the curb","Away from the curb","Straight ahead","It doesn't matter"],why:"Toward the curb, so the curb stops the car."},
+ // Sharing the road
+ {q:"A school bus is stopped with red lights flashing on a 2-lane road. What do you do?",a:["Stop, whichever direction you're going","Stop only if you're behind it","Slow to 15 mph and pass","Honk and pass carefully"],why:"On undivided roads, traffic in both directions must stop."},
+ {q:"When must oncoming traffic NOT stop for a stopped school bus?",a:["On a divided highway with a raised median or barrier","Never; everyone always stops","When the bus is yellow","After 6 pm"],why:"Only a raised barrier or an unpaved median at least 5 feet wide lets oncoming traffic continue."},
+ {q:"A police car is stopped on the shoulder with lights flashing. Florida's Move Over law says:",a:["Move over a lane, or slow to 20 mph below the limit","Stop behind it","Speed up to pass quickly","Honk to warn them"],why:"Move over if you safely can; if not, slow to 20 mph below the posted limit."},
+ {q:"An ambulance with siren on is coming behind you. You should:",a:["Pull to the right edge and stop","Speed up","Stop where you are, even in an intersection","Keep going at the same speed"],why:"Pull over to the right and stop until it passes."},
+ {q:"A pedestrian with a white cane or guide dog is crossing. You must:",a:["Stop and let them cross","Honk to warn them","Drive around them slowly","Flash your lights"],why:"Always stop for blind pedestrians."},
+ // Lights, weather, emergencies
+ {q:"In Florida, you must turn on your headlights when:",a:["Your wipers are on because of rain, and from sunset to sunrise","Only after midnight","Only on highways","Only in fog"],why:"Headlights are required at night and whenever rain, smoke or fog reduces visibility."},
+ {q:"Switch to low beams when an oncoming car is within:",a:["500 feet","100 feet","1,000 feet","50 feet"],why:"Dim within 500 feet of oncoming cars, and within 300 feet when following one."},
+ {q:"Driving in fog, you should use:",a:["Low beams","High beams","Parking lights only","Hazard lights only"],why:"High beams reflect off fog and make it harder to see."},
+ {q:"Your car starts to hydroplane on a wet road. You should:",a:["Ease off the gas and steer straight","Brake hard","Speed up","Turn sharply"],why:"Let the car slow down on its own until the tires grip again."},
+ {q:"If your car skids, you should:",a:["Steer in the direction you want the front of the car to go","Brake hard","Steer the opposite way","Let go of the wheel"],why:"Steer where you want to go and avoid slamming the brakes."},
+ {q:"An oncoming car's bright lights are blinding you. Look:",a:["Toward the right edge of your lane","Straight at the lights","At the center line","Down at your dashboard"],why:"Look at the right edge of the road until the car passes."},
+ // Law
+ {q:"For drivers 21 and older, the legal blood alcohol limit is:",a:["0.08%","0.05%","0.10%","0.02%"],why:"0.08% or more is DUI in Florida."},
+ {q:"For drivers under 21, the blood alcohol limit is:",a:["0.02%","0.08%","0.05%","0.04%"],why:"Under 21, 0.02% or more means a license suspension."},
+ {q:"The first time you refuse a breath, blood or urine test, your license is suspended for:",a:["1 year","30 days","6 months","18 months"],why:"Florida's implied consent law: 1 year for a first refusal."},
+ {q:"Children age 5 and under must ride in:",a:["A crash-tested child seat or booster","Any seat with a belt","The front seat","An adult's lap"],why:"Ages 0–3 need a car seat; ages 4–5 need a car seat or booster."},
+ {q:"Who must wear a seat belt in Florida?",a:["The driver, front passenger, and everyone under 18","Only the driver","Only children","Only on highways"],why:"Driver and front passenger always, plus all passengers under 18."},
+ {q:"How many points within 12 months suspend your license for 30 days?",a:["12","6","18","24"],why:"12 points in 12 months means a 30-day suspension."},
+ {q:"Texting while driving in Florida is:",a:["Illegal; police can stop you for it","Allowed at red lights","Allowed under 25 mph","Only illegal for truck drivers"],why:"Texting while driving is a primary offense. Handheld phone use is banned in school and work zones."},
+ {q:"You crash and someone is hurt. You must:",a:["Stop, help, and call the police","Leave if it wasn't your fault","Exchange numbers later","Only call your insurance"],why:"Stop, give aid, and report any crash with injury."},
+ {q:"After you move, you must update the address on your license within:",a:["30 days","10 days","90 days","1 year"],why:"Florida gives you 30 days."},
+ {q:"With a learner's license (under 18), during the first 3 months you may drive:",a:["Daytime only, with a licensed driver 21+ beside you","Anytime alone","Nights only","Only on highways"],why:"Daylight only for 3 months, then until 10 pm. Always with a licensed driver 21+ in the front seat."}
+];
+
+function signSVG(k){
+  const box=(inner)=>`<svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Road sign shape">${inner}</svg>`;
+  const oct=(r)=>Array.from({length:8},(_,i)=>{const a=Math.PI/8+i*Math.PI/4;return `${60+r*Math.cos(a)},${60+r*Math.sin(a)}`}).join(" ");
+  switch(k){
+    case "stop":return box(`<polygon points="${oct(56)}" fill="#C8102E" stroke="#FFFFFF" stroke-width="0"/><polygon points="${oct(50)}" fill="none" stroke="#FFFFFF" stroke-width="3"/>`);
+    case "yield":return box(`<polygon points="6,14 114,14 60,108" fill="#C8102E"/><polygon points="26,26 94,26 60,86" fill="#FFFFFF"/>`);
+    case "school":return box(`<polygon points="60,6 112,44 112,112 8,112 8,44" fill="#C6E21B" stroke="#111" stroke-width="3"/>`);
+    case "rr":return box(`<circle cx="60" cy="60" r="54" fill="#FFD100" stroke="#111" stroke-width="3"/>`);
+    case "warn":return box(`<polygon points="60,4 116,60 60,116 4,60" fill="#FFD100" stroke="#111" stroke-width="3"/>`);
+    case "work":return box(`<polygon points="60,4 116,60 60,116 4,60" fill="#F28C00" stroke="#111" stroke-width="3"/>`);
+    case "nopass":return box(`<polygon points="4,24 116,60 4,96" fill="#FFD100" stroke="#111" stroke-width="3"/>`);
+    case "service":return box(`<rect x="10" y="24" width="100" height="72" rx="6" fill="#1F4E9E" stroke="#FFFFFF" stroke-width="3"/>`);
+    case "guide":return box(`<rect x="6" y="30" width="108" height="60" rx="6" fill="#00703C" stroke="#FFFFFF" stroke-width="3"/>`);
+    case "rec":return box(`<rect x="10" y="24" width="100" height="72" rx="6" fill="#6B4423" stroke="#FFFFFF" stroke-width="3"/>`);
+  }return "";
+}
+
+
+/* Countdown */
+(()=>{const a=new Date(2026,11,18),t=new Date();t.setHours(0,0,0,0);$("days").textContent=Math.max(0,Math.round((a-t)/864e5))})();
+
+/* Checklist */
+const TASKS=[
+  {g:"Now",items:[
+    ["c1","p","Ask Sickles: did I pass the written test?"],
+    ["c2","e","Call (850) 617-3682: is TLSAE on file?"],
+    ["c3","p","Practice test: 40/50 or better"],
+    ["c4","e","Nov 21: book DMV for Dec 21–23"]]},
+  {g:"Pack for DMV day",items:[
+    ["b1","p","Passport or US birth certificate"],
+    ["b2","p","Social Security card"],
+    ["b3","p","Glasses or contacts (if he wears them)"],
+    ["b4","e","Ebbe's ID"],
+    ["b5","e","Lease or mortgage"],
+    ["b6","e","1 bill from the last 60 days"],
+    ["b7","e","Address form HSMV-71120 (sign at the office)"],
+    ["b8","e","Consent form HSMV-71142 (sign at the office)"]]},
+  {g:"After",items:[
+    ["a1","p","Get the permit 🎉"],
+    ["a2","b","Practice driving: 50 hours (10 at night)"]]}
+];
+let ticks=store.get("pp-ticks",{});
+function renderList(){
+  const W={p:"Philip",e:"Ebbe",b:"Both"};
+  $("list").innerHTML=TASKS.map(g=>`<div class="grp-h">${g.g}</div>`+g.items.map(([id,w,t])=>`<label class="task${ticks[id]?" done":""}">
+    <input type="checkbox" class="check" data-id="${id}" ${ticks[id]?"checked":""}>
+    <span class="t">${esc(t)}</span><span class="who ${w==="p"?"p":""}">${W[w]}</span></label>`).join("")).join("");
+}
+$("list").addEventListener("change",e=>{const id=e.target.dataset.id;if(!id)return;ticks[id]=e.target.checked;store.set("pp-ticks",ticks);renderList()});
+renderList();
+
+/* Practice test */
+let scores=store.get("pp-scores",[]),quiz=null;
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function showBest(){const b=scores.reduce((m,s)=>Math.max(m,Math.round(s.score/s.total*100)),-1);$("best").textContent=b<0?"–":b+"%"}
+function startQuiz(n){
+  quiz={items:shuffle(Q).slice(0,n).map(x=>({...x,opts:shuffle(x.a.map((t,i)=>({t,ok:i===0})))})),i:0,right:0,picked:null,saved:false};
+  renderQuiz();$("practice").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function renderQuiz(){
+  const box=$("quiz");
+  if(!quiz){
+    box.innerHTML=`<p class="hint" style="margin:0 0 12px">The real test has 50 questions. Philip needs 40 right (80%) to pass.</p>
+      <div class="row"><button class="btn" data-q="start" data-n="10">Quick 10</button><button class="btn ghost" data-q="start" data-n="${Q.length}">All ${Q.length} questions</button></div>
+      ${scores.length?`<p class="hint" style="margin:14px 0 0">Recent scores</p><div class="scores">${scores.slice(0,10).map(s=>`<span class="sc ${s.score/s.total<0.8?"fail":""}">${s.score}/${s.total}</span>`).join("")}</div>`:""}`;
+    return;
+  }
+  const n=quiz.items.length;
+  if(quiz.i>=n){
+    const pct=Math.round(quiz.right/n*100),pass=pct>=80;
+    if(!quiz.saved){quiz.saved=true;scores.unshift({score:quiz.right,total:n,at:Date.now()});scores=scores.slice(0,30);store.set("pp-scores",scores);showBest()}
+    box.innerHTML=`<div class="big">${quiz.right}/${n}</div><span class="verdict ${pass?"":"fail"}">${pct}% · ${pass?"Would pass":"Not yet. Need 80%"}</span>
+      <div class="row"><button class="btn" data-q="start" data-n="${n}">Try again</button><button class="btn ghost" data-q="home">Done</button></div>`;
+    return;
+  }
+  const it=quiz.items[quiz.i],p=quiz.picked;
+  box.innerHTML=`<div class="qz-top"><span>Question ${quiz.i+1} of ${n}</span><span>${quiz.right} right so far</span></div>
+    ${it.s?`<div class="qz-sign">${signSVG(it.s)}</div>`:""}
+    <p class="qz-q">${esc(it.q)}</p>
+    <div class="opts">${it.opts.map((o,k)=>{let c="opt";if(p!==null){if(o.ok)c+=" right";else if(k===p)c+=" wrong"}
+      return `<button class="${c}" data-q="pick" data-k="${k}" ${p!==null?"disabled":""}>${esc(o.t)}</button>`}).join("")}</div>
+    ${p!==null?`<div class="why ${it.opts[p].ok?"":"bad"}"><strong>${it.opts[p].ok?"Correct.":"Not quite."}</strong> ${esc(it.why)}</div>
+      <div class="row" style="margin-top:12px"><button class="btn" data-q="next">${quiz.i+1<n?"Next question":"See score"}</button><button class="btn ghost" data-q="home">Stop</button></div>`:""}`;
+}
+$("quiz").addEventListener("click",e=>{
+  const b=e.target.closest("[data-q]");if(!b)return;const a=b.dataset.q;
+  if(a==="start")startQuiz(Number(b.dataset.n));
+  if(a==="home"){quiz=null;renderQuiz()}
+  if(a==="pick"&&quiz.picked===null){quiz.picked=Number(b.dataset.k);if(quiz.items[quiz.i].opts[quiz.picked].ok)quiz.right++;renderQuiz()}
+  if(a==="next"){quiz.i++;quiz.picked=null;renderQuiz()}
+});
+renderQuiz();showBest();
+</script>
+</body>
+</html>
